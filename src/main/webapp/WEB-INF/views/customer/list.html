@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>list of customers</title>
+    <link rel="stylesheet" href="/assets/bootstrap/v5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/assets/fontawesome/v5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/assets/sweetalert2/v11.7.0/sweetalert2.min.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="col-lg-12">
+            <div class="col-lg-6 float-start">
+                <h1>List of customers</h1>
+            </div>
+            <div class="col-lg-6 float-start text-right">
+                <a href="/histories/transfers">
+                    <button class="btn btn-outline-light">
+                        <i class="fas fa-bars"></i>
+                        Transfer History
+                    </button>
+                </a>
+                <button type="button" id="btnShowCreateModal" class="btn btn-outline-light">
+                    <i class="fas fa-plus"></i>
+                    Create
+                </button>
+            </div>
+        </div>
+    </header>
+    <div class="content">
+        <table id="tbCustomer" class="table table-hover">
+            <thead>
+            <tr>
+                <th class="text-center">#</th>
+                <th class="text-center">Full Name</th>
+                <th class="text-center">Email</th>
+                <th class="text-center">Phone</th>
+                <th class="text-center">Balance</th>
+                <th class="text-center">Address</th>
+                <th class="text-center" colspan="5">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <footer class="hidden">
+
+    </footer>
+</div>
+
+<!-- Modal Create -->
+<div class="modal fade" id="modalCreateCustomer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Modal create</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-alert-danger hide">
+
+                </div>
+                <form id="frmCreateCustomer" method="post" >
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" id="fullNameCre" name="fullNameCre" />
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Email</label>
+                            <input type="email" class="form-control" id="emailCre" name="emailCre" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <label>Phone</label>
+                            <input type="tel" class="form-control" id="phoneCre" name="phoneCre" />
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Address</label>
+                            <input type="text" class="form-control" id="addressCre" name="addressCre" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnCreate" class="btn btn-outline-primary">
+                    <i class="fas fa-plus"></i>
+                    Create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Update -->
+<div class="modal fade" id="modalUpdateCustomer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Modal update</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" >
+                    <div class="row">
+                        <input type="hidden" class="form-control" id="idUp">
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" id="fullNameUp" />
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Email</label>
+                            <input type="email" class="form-control" id="emailUp" />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <label>Phone</label>
+                            <input type="tel" class="form-control" id="phoneUp" />
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Address</label>
+                            <input type="text" class="form-control" id="addressUp" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnUpdate" class="btn btn-outline-secondary">
+                    <i class="fas fa-pencil-alt"></i>
+                    Update
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Deposit -->
+<div class="modal fade" id="modalDeposit" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Modal deposit</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" >
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <label>Customer ID</label>
+                            <input type="text" class="form-control" id="idDep" readonly />
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" id="fullNameDep" readonly />
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-6">
+                            <label>Balance</label>
+                            <input type="text" class="form-control" id="balanceDep" readonly />
+                        </div>
+                        <div class="col-lg-6">
+                            <label>Transaction Amount</label>
+                            <input type="text" class="form-control" id="transactionAmountDep" />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnDeposit" class="btn btn-outline-success">
+                    <i class="fas fa-plus"></i>
+                    Deposit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/jquery/v3.6.3/jquery-3.6.3.min.js"></script>
+<script src="/assets/bootstrap/v5.3.0/js/bootstrap.bundle.min.js"></script>
+<script src="/assets/sweetalert2/v11.7.0/sweetalert2.min.js"></script>
+<script src="/assets/jquery-validate/v1.19.5/jquery.validate.min.js"></script>
+
+<script src="/assets/js/appBase.js"></script>
+
+<script>
+
+    const page = {
+        urls: {
+            getAllCustomers: AppBase.API_CUSTOMER,
+            getCustomerById: AppBase.API_CUSTOMER,
+            doDeposit: AppBase.API_DEPOSIT
+        }
+    }
+
+    let customer = {};
+
+    function getAllCustomers() {
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "GET",
+            // url: "http://localhost:3300/customers?deleted=0"
+            url: page.urls.getAllCustomers
+        })
+            .done((data) => {
+                $.each(data, (i, item) => {
+                    let str = renderCustomer(item);
+                    document.querySelector("#tbCustomer tbody").innerHTML += str;
+                })
+
+                addEventShowModalUpdate();
+
+                addEventShowModalDeposit();
+
+                addEventShowConfirmDelete();
+            })
+            .fail((error) => {
+                console.log(error)
+            })
+    }
+
+    getAllCustomers();
+
+    function addEventShowModalUpdate() {
+        $(".update").on("click", function() {
+            let customerId = $(this).data("id");
+
+            findById(customerId).then(() => {
+                console.log(customer)
+
+                if (customer !== null) {
+                    $("#idUp").val(customer.id);
+                    $("#fullNameUp").val(customer.fullName);
+                    $("#emailUp").val(customer.email);
+                    $("#phoneUp").val(customer.phone);
+                    $("#addressUp").val(customer.address);
+
+                    $("#modalUpdateCustomer").modal("show");
+                }
+            });
+        })
+    }
+
+    function addEventShowModalDeposit() {
+        $(".deposit").on("click", function() {
+            let customerId = $(this).data("id");
+
+            findById(customerId).then(() => {
+                if (customer !== null) {
+                    $("#idDep").val(customer.id);
+                    $("#fullNameDep").val(customer.fullName);
+                    $("#balanceDep").val(customer.balance);
+
+                    $("#modalDeposit").modal("show");
+                }
+            });
+        })
+    }
+
+    function addEventShowConfirmDelete() {
+        $(".delete").on("click", function() {
+            let customerId = $(this).data("id");
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+
+                    let customer = {
+                        deleted: 1
+                    }
+
+                    $.ajax({
+                        headers: {
+                            "accept": "application/json",
+                            "content-type": "application/json"
+                        },
+                        type: "PATCH",
+                        url: "http://localhost:3300/customers/" + customerId,
+                        data: JSON.stringify(customer)
+                    })
+                        .done((data) => {
+                            $("#tr_" + customerId).remove();
+
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Delete customer successful',
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        })
+                        .fail((error) => {
+                            console.log(error)
+                        })
+                }
+            })
+        })
+    }
+
+    $("#modalCreateCustomer").on("hidden.bs.modal", () => {
+        $("#frmCreateCustomer")[0].reset();
+        $("#frmCreateCustomer").validate().resetForm();
+    })
+
+
+    function renderCustomer(item) {
+        return `
+                <tr id="tr_${item.id}">
+                    <td class="text-center">${item.id}</td>
+                    <td>${item.fullName}</td>
+                    <td class="text-center">${item.email}</td>
+                    <td class="text-center">${item.phone}</td>
+                    <td class="text-end">${item.balance}</td>
+                    <td>${item.address}</td>
+                    <td>
+                        <button class="btn btn-outline-secondary update" data-id="${item.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-success deposit" data-id="${item.id}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-warning">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-primary">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-danger delete" data-id="${item.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+    }
+
+    function findById(customerId) {
+        return $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "GET",
+            url: page.urls.getCustomerById + "/" + customerId
+        })
+            .done((data) => {
+                customer = data;
+            })
+            .fail((error) => {
+                console.log(error)
+            })
+    }
+
+    $("#btnShowCreateModal").on("click", () => {
+        $("#modalCreateCustomer").modal("show");
+    })
+
+    function doCreateCustomer() {
+        let fullName = $("#fullNameCre").val();
+        let email = $("#emailCre").val();
+        let phone = $("#phoneCre").val();
+        let address = $("#addressCre").val();
+        let balance = 0;
+        let deleted = 0;
+
+        let customer = {
+            fullName,
+            email,
+            phone,
+            address,
+            balance,
+            deleted
+        }
+
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "POST",
+            url: "http://localhost:3300/customers",
+            data: JSON.stringify(customer)
+        })
+            .done((data) => {
+                customer = data;
+                $("#modalCreate").modal("hide");
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Create customer successful',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+
+                let newRow = renderCustomer(customer);
+
+                $("#tbCustomer tbody").append(newRow);
+
+                addEventShowModalUpdate();
+
+                addEventShowModalDeposit();
+
+                addEventShowConfirmDelete();
+
+            })
+            .fail((error) => {
+                console.log(error)
+            })
+    }
+
+    $("#btnCreate").on("click", () => {
+        $("#frmCreateCustomer").trigger("submit");
+    })
+
+    $("#btnUpdate").on("click", () => {
+        let id = +$("#idUp").val();
+        let fullName = $("#fullNameUp").val();
+        let email = $("#emailUp").val();
+        let phone = $("#phoneUp").val();
+        let address = $("#addressUp").val();
+        let balance = 0;
+        let deleted = 0;
+
+        let customer = {
+            fullName,
+            email,
+            phone,
+            address,
+            balance,
+            deleted
+        }
+
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "PATCH",
+            url: "http://localhost:3300/customers/" + id,
+            data: JSON.stringify(customer)
+        })
+            .done((data) => {
+                customer = data;
+                $("#modalUpdate").modal("hide");
+
+                let currentRow = $("#tr_" + customer.id);
+                let newRow = renderCustomer(customer);
+
+                currentRow.replaceWith(newRow);
+
+                addEventShowModalUpdate();
+
+                addEventShowModalDeposit();
+
+                addEventShowConfirmDelete();
+
+            })
+            .fail((error) => {
+                console.log(error)
+            })
+    })
+
+    $("#btnDeposit").on("click", () => {
+
+        let currentBalance = customer.balance;
+        let transactionAmount = +$("#transactionAmountDep").val();
+        let newBalance = currentBalance + transactionAmount;
+        customer.balance = newBalance;
+
+        let deposit = {
+            customerId: customer.id,
+            transactionAmount: transactionAmount
+        }
+
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "POST",
+            url: page.urls.doDeposit,
+            data: JSON.stringify(deposit)
+        })
+            .done((data) => {
+
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+
+
+        $.ajax({
+            headers: {
+                "accept": "application/json",
+                "content-type": "application/json"
+            },
+            type: "PATCH",
+            url: "http://localhost:3300/customers/" + customer.id,
+            data: JSON.stringify(customer)
+        })
+            .done((data) => {
+                customer = data;
+
+                let currentRow = $("#tr_" + customer.id);
+                let newRow = renderCustomer(customer);
+
+                currentRow.replaceWith(newRow);
+
+                $("#modalDeposit").modal("hide");
+
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Depsoit successful',
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            })
+            .fail((error) => {
+                console.error(error);
+            })
+
+    })
+
+    $("#frmCreateCustomer").validate({
+        rules: {
+            fullNameCre: {
+                required: true,
+                minlength: 5
+            },
+            emailCre: {
+                required: true,
+                email: false,
+                isValidEmail: true
+            }
+        },
+        messages: {
+            fullNameCre: {
+                required: "Full name is required.",
+                minlength: "Full name must be more than 5 letters"
+            },
+            emailCre: {
+                required: "Email is required.",
+                // email: "Please enter a valid email address"
+            }
+        },
+        errorLabelContainer: "#modalCreateCustomer .modal-alert-danger",
+        errorPlacement: function (error, element) {
+            error.appendTo("#modalCreateCustomer .modal-alert-danger");
+        },
+        showErrors: function(errorMap, errorList) {
+            if (this.numberOfInvalids() > 0) {
+                $("#modalCreateCustomer .modal-alert-danger").removeClass("hide").addClass("show");
+            } else {
+                $("#modalCreateCustomer .modal-alert-danger").removeClass("show").addClass("hide").empty();
+                $("#frmCreateCustomer input.error").removeClass("error");
+            }
+            this.defaultShowErrors();
+        },
+        submitHandler: () => {
+            doCreateCustomer();
+        }
+    });
+
+    $.validator.addMethod("isValidEmail", function (value, element) {
+        return this.optional(element) || /^[\w]+@([\w-]+\.)+[\w-]{2,6}$/i.test(value);
+    }, "Vui lòng nhập Email hợp lệ");
+
+
+
+</script>
+
+</body>
+</html>
