@@ -4,12 +4,17 @@ import com.cg.exception.DataInputException;
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
 import com.cg.model.Transfer;
+import com.cg.model.dto.CustomerDTO;
 import com.cg.model.dto.DepositCreateDTO;
+import com.cg.model.dto.TransferReqDTO;
 import com.cg.service.customer.ICustomerService;
+import com.cg.utils.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.awt.*;
@@ -23,6 +28,9 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/customers")
 public class CustomerRestController {
+
+    @Autowired
+    private AppUtils appUtils;
 
     @Autowired
     private ICustomerService customerService;
@@ -101,10 +109,20 @@ public class CustomerRestController {
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<?> doTransfer(@RequestBody Transfer transfer) {
+    public ResponseEntity<?> doTransfer(@Validated @RequestBody TransferReqDTO transferReqDTO, BindingResult bindingResult) {
 
-        Long senderId = transfer.getSender().getId();
-        Long recipientId = transfer.getRecipient().getId();
+        new TransferReqDTO().validate(transferReqDTO, bindingResult);
+
+        if (bindingResult.hasFieldErrors()) {
+            return appUtils.mapErrorToResponse(bindingResult);
+        }
+
+        String senderIdStr = transferReqDTO.getSenderId();
+        String recipientIdStr = transferReqDTO.getRecipientId();
+
+        Long senderId = Long.parseLong(senderIdStr);
+        Long recipientId = Long.parseLong(recipientIdStr);
+
 
         Optional<Customer> senderOptional = customerService.findById(senderId);
         Customer sender = null;
@@ -121,9 +139,14 @@ public class CustomerRestController {
         }
 
         sender = senderOptional.get();
+        recipient = recipientOptional.get();
+
+        if (senderId.equals(recipientId)) {
+            throw new DataInputException("Sender not same Recipient");
+        }
 
         BigDecimal currentSenderBalance = sender.getBalance();
-        BigDecimal transferAmount = transfer.getTransferAmount();
+        BigDecimal transferAmount = BigDecimal.valueOf(Long.parseLong(transferReqDTO.getTransferAmount()));
         long fees = 10L;
         BigDecimal feesAmount = transferAmount.multiply(BigDecimal.valueOf(fees)).divide(BigDecimal.valueOf(100L));
         BigDecimal transactionAmount = transferAmount.add(feesAmount);
@@ -132,11 +155,11 @@ public class CustomerRestController {
             throw new DataInputException("Sender balance not enough to transfer transaction");
         }
 
-        recipient = recipientOptional.get();
 
-        transfer.setId(null);
+        Transfer transfer = new Transfer();
         transfer.setSender(sender);
         transfer.setRecipient(recipient);
+        transfer.setTransferAmount(transferAmount);
         transfer.setFees(fees);
         transfer.setFeesAmount(feesAmount);
         transfer.setTransactionAmount(transactionAmount);
@@ -146,9 +169,14 @@ public class CustomerRestController {
         sender.setBalance(sender.getBalance().subtract(transactionAmount));
         recipient.setBalance(recipient.getBalance().add(transferAmount));
 
-        Map<String, Customer> result = new HashMap<>();
-        result.put("sender", sender);
-        result.put("recipient", recipient);
+
+        CustomerDTO senderDTO = sender.toCustomerDTO();
+
+        CustomerDTO recipientDTO = recipient.toCustomerDTO();
+
+        Map<String, CustomerDTO> result = new HashMap<>();
+        result.put("sender", senderDTO);
+        result.put("recipient", recipientDTO);
 
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

@@ -1,15 +1,22 @@
 package com.cg.model;
 
+import com.cg.model.dto.CustomerDTO;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.util.List;
 
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "customers")
 public class Customer extends BaseEntity implements Validator {
@@ -29,7 +36,9 @@ public class Customer extends BaseEntity implements Validator {
     @Column(precision = 12, scale = 0, nullable = false, updatable = false)
     private BigDecimal balance;
 
-    private String address;
+    @OneToOne
+    @JoinColumn(name = "location_region_id", referencedColumnName = "id", nullable = false)
+    private LocationRegion locationRegion;
 
 
     @OneToMany(targetEntity = Deposit.class, fetch = FetchType.EAGER)
@@ -38,18 +47,6 @@ public class Customer extends BaseEntity implements Validator {
     @OneToMany(targetEntity = Transfer.class)
     private List<Transfer> transfers;
 
-    public Customer() {
-    }
-
-    public Customer(Long id, String fullName, String email, String phone, BigDecimal balance, String address, List<Deposit> deposits) {
-        this.id = id;
-        this.fullName = fullName;
-        this.email = email;
-        this.phone = phone;
-        this.balance = balance;
-        this.address = address;
-        this.deposits = deposits;
-    }
 
     @Override
     public String toString() {
@@ -63,60 +60,15 @@ public class Customer extends BaseEntity implements Validator {
                 '}';
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public BigDecimal getBalance() {
-        return balance;
-    }
-
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public List<Deposit> getDeposits() {
-        return deposits;
-    }
-
-    public void setDeposits(List<Deposit> deposits) {
-        this.deposits = deposits;
+    public CustomerDTO toCustomerDTO() {
+        return new CustomerDTO()
+                .setId(id)
+                .setFullName(fullName)
+                .setEmail(email)
+                .setPhone(phone)
+                .setBalance(balance)
+                .setAddress(address)
+                ;
     }
 
     @Override

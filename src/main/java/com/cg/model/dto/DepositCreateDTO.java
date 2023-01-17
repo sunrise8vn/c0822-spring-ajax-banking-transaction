@@ -1,37 +1,22 @@
 package com.cg.model.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
 
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class DepositCreateDTO implements Validator {
 
     private Long id;
     private String transactionAmount;
 
-    public DepositCreateDTO() {
-    }
-
-    public DepositCreateDTO(Long id, String transactionAmount) {
-        this.id = id;
-        this.transactionAmount = transactionAmount;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTransactionAmount() {
-        return transactionAmount;
-    }
-
-    public void setTransactionAmount(String transactionAmount) {
-        this.transactionAmount = transactionAmount;
-    }
 
     @Override
     public boolean supports(Class<?> clazz) {
