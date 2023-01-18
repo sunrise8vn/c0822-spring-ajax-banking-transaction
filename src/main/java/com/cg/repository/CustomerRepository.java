@@ -1,6 +1,7 @@
 package com.cg.repository;
 
 import com.cg.model.Customer;
+import com.cg.model.dto.CustomerDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,11 +19,33 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     List<Customer> findAllByDeletedIsFalse();
 
-    @Modifying
-    @Query("UPDATE Customer AS c SET c.balance = c.balance + :transactionAmount WHERE c.id = :customerId")
-    void incrementBalance(@Param("customerId") Long customerId, @Param("transactionAmount") BigDecimal transactionAmount);
+
+    @Query("SELECT NEW com.cg.model.dto.CustomerDTO (" +
+                "c.id, " +
+                "c.fullName, " +
+                "c.email, " +
+                "c.phone, " +
+                "c.balance, " +
+                "c.locationRegion" +
+            ") " +
+            "FROM Customer AS c " +
+            "WHERE c.deleted = FALSE "
+    )
+    List<CustomerDTO> findAllCustomerDTOByDeletedIsFalse();
+
 
     @Modifying
-    @Query("UPDATE Customer AS c SET c.balance = c.balance - :transactionAmount WHERE c.id = :customerId")
+    @Query("UPDATE Customer AS c " +
+            "SET c.balance = c.balance + :transactionAmount " +
+            "WHERE c.id = :customerId"
+    )
+    void incrementBalance(@Param("customerId") Long customerId, @Param("transactionAmount") BigDecimal transactionAmount);
+
+
+    @Modifying
+    @Query("UPDATE Customer AS c " +
+            "SET c.balance = c.balance - :transactionAmount " +
+            "WHERE c.id = :customerId"
+    )
     void deIncrementBalance(@Param("customerId") Long customerId, @Param("transactionAmount") BigDecimal transactionAmount);
 }

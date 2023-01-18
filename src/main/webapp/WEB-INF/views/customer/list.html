@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-<div class="container">
+<div class="container-fluid">
     <header>
         <div class="col-lg-12">
             <div class="col-lg-6 float-start">
@@ -40,7 +40,10 @@
                 <th class="text-center">Email</th>
                 <th class="text-center">Phone</th>
                 <th class="text-center">Balance</th>
-                <th class="text-center">Address</th>
+                <th>Province</th>
+                <th>District</th>
+                <th>Ward</th>
+                <th>Address</th>
                 <th class="text-center" colspan="5">Action</th>
             </tr>
             </thead>
@@ -55,7 +58,7 @@
 
 <!-- Modal Create -->
 <div class="modal fade" id="modalCreateCustomer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5">Modal create</h1>
@@ -67,21 +70,33 @@
                 </div>
                 <form id="frmCreateCustomer" method="post" >
                     <div class="row mt-3">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <label>Full Name</label>
                             <input type="text" class="form-control" id="fullNameCre" name="fullNameCre" />
                         </div>
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <label>Email</label>
                             <input type="email" class="form-control" id="emailCre" name="emailCre" />
                         </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-lg-6">
+                        <div class="col-lg-4">
                             <label>Phone</label>
                             <input type="tel" class="form-control" id="phoneCre" name="phoneCre" />
                         </div>
-                        <div class="col-lg-6">
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-lg-3">
+                            <label>Province</label>
+                            <select class="form-select" id="provinceCre"></select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label>District</label>
+                            <select class="form-select" id="districtCre"></select>
+                        </div>
+                        <div class="col-lg-3">
+                            <label>Ward</label>
+                            <select class="form-select" id="wardCre"></select>
+                        </div>
+                        <div class="col-lg-3">
                             <label>Address</label>
                             <input type="text" class="form-control" id="addressCre" name="addressCre" />
                         </div>
@@ -282,6 +297,7 @@
             getAllCustomers: AppBase.API_CUSTOMER,
             getCustomerById: AppBase.API_CUSTOMER,
             getAllRecipientsWithOutSender: AppBase.API_CUSTOMER + '/get-all-recipients-with-out-sender',
+            doCreateCustomer: AppBase.API_CUSTOMER,
             doDeposit: AppBase.API_CUSTOMER + '/deposit',
             doTransfer: AppBase.API_CUSTOMER + '/transfer'
         }
@@ -297,7 +313,7 @@
             .done((data) => {
                 $.each(data, (i, item) => {
                     let str = renderCustomer(item);
-                    document.querySelector("#tbCustomer tbody").innerHTML += str;
+                    $("#tbCustomer tbody").prepend(str);
                 })
 
                 addEventShowModalUpdate();
@@ -314,6 +330,124 @@
     }
 
     getAllCustomers();
+
+    function getAllProvinces() {
+        $.ajax({
+            type: "GET",
+            url: "https://vapi.vnappmob.com/api/province/"
+        })
+        .done((data) => {
+            $.each(data.results, (i, item) => {
+                let str = `<option value="${item.province_id}">${item.province_name}</option>`;
+                $('#provinceCre').append(str)
+            })
+
+            let str = `<option value="0" selected>-- Please selected --</option>`;
+            $('#provinceCre').prepend(str)
+
+            addEventChangeProvince();
+        })
+        .fail((error) => {
+            Swal.fire({
+                position: 'top-end',
+                icon: 'error',
+                title: "Can't get all provinces"
+            })
+        })
+    }
+
+    getAllProvinces();
+
+    function addEventChangeProvince() {
+        let removed = false;
+        $("#provinceCre").on("change", function () {
+            let provinceId = $(this).val();
+
+            if (provinceId !== 0) {
+                if (!removed) {
+                    $('#provinceCre option')[0].remove();
+                    removed = !removed;
+                }
+
+                getAllDistrictsByProvinceId(provinceId);
+            }
+
+        })
+    }
+
+    function getAllDistrictsByProvinceId(provinceId) {
+        $.ajax({
+            type: "GET",
+            url: "https://vapi.vnappmob.com/api/province/district/" + provinceId
+        })
+            .done((data) => {
+
+                $('#districtCre').empty();
+
+                $.each(data.results, (i, item) => {
+                    let str = `<option value="${item.district_id}">${item.district_name}</option>`;
+                    $('#districtCre').append(str)
+                })
+
+                let str = `<option value="0" selected>-- Please selected --</option>`;
+                $('#districtCre').prepend(str)
+
+                addEventChangeDistrict();
+
+            })
+            .fail((error) => {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: "Can't get all districts"
+                })
+            })
+    }
+
+    function addEventChangeDistrict() {
+        let removed = false;
+
+        $("#districtCre").on("change", function () {
+            let districtId = $(this).val();
+
+            if (districtId !== 0) {
+                if (!removed) {
+                    $('#districtCre option')[0].remove();
+                    removed = !removed;
+                }
+
+                getAllWardsByDistrictId(districtId);
+            }
+
+        })
+    }
+
+    function getAllWardsByDistrictId(districtId) {
+        $.ajax({
+            type: "GET",
+            url: "https://vapi.vnappmob.com/api/province/ward/" + districtId
+        })
+            .done((data) => {
+
+                $('#wardCre').empty();
+
+                $.each(data.results, (i, item) => {
+                    let str = `<option value="${item.ward_id}">${item.ward_name}</option>`;
+                    $('#wardCre').append(str)
+                })
+
+                let str = `<option value="0" selected>-- Please selected --</option>`;
+                $('#wardCre').prepend(str)
+
+            })
+            .fail((error) => {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'error',
+                    title: "Can't get all wards"
+                })
+            })
+    }
 
     function addEventShowModalUpdate() {
         $(".update").on("click", function() {
@@ -466,7 +600,10 @@
                     <td class="text-center">${item.email}</td>
                     <td class="text-center">${item.phone}</td>
                     <td class="text-end">${item.balance}</td>
-                    <td>${item.address}</td>
+                    <td>${item.locationRegion.provinceName}</td>
+                    <td>${item.locationRegion.districtName}</td>
+                    <td>${item.locationRegion.wardName}</td>
+                    <td>${item.locationRegion.address}</td>
                     <td>
                         <button class="btn btn-outline-secondary update" data-id="${item.id}">
                             <i class="fas fa-edit"></i>
@@ -517,15 +654,31 @@
         let fullName = $("#fullNameCre").val();
         let email = $("#emailCre").val();
         let phone = $("#phoneCre").val();
+        let provinceId = $("#provinceCre").val();
+        let provinceName = $("#provinceCre").find("option:selected").text();
+        let districtId = $("#districtCre").val();
+        let districtName = $("#districtCre").find("option:selected").text();
+        let wardId = $("#wardCre").val();
+        let wardName = $("#wardCre").find("option:selected").text();
         let address = $("#addressCre").val();
         let balance = 0;
         let deleted = 0;
+
+        let locationRegion = {
+            provinceId,
+            provinceName,
+            districtId,
+            districtName,
+            wardId,
+            wardName,
+            address
+        }
 
         let customer = {
             fullName,
             email,
             phone,
-            address,
+            locationRegion,
             balance,
             deleted
         }
@@ -536,12 +689,12 @@
                 "content-type": "application/json"
             },
             type: "POST",
-            url: "http://localhost:3300/customers",
+            url: page.urls.doCreateCustomer,
             data: JSON.stringify(customer)
         })
             .done((data) => {
                 customer = data;
-                $("#modalCreate").modal("hide");
+                $("#modalCreateCustomer").modal("hide");
 
                 Swal.fire({
                     position: 'top-end',
@@ -553,7 +706,7 @@
 
                 let newRow = renderCustomer(customer);
 
-                $("#tbCustomer tbody").append(newRow);
+                $("#tbCustomer tbody").prepend(newRow);
 
                 addEventShowModalUpdate();
 

@@ -2,9 +2,12 @@ package com.cg.service.customer;
 
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
+import com.cg.model.LocationRegion;
 import com.cg.model.Transfer;
+import com.cg.model.dto.CustomerDTO;
 import com.cg.repository.CustomerRepository;
 import com.cg.repository.DepositRepository;
+import com.cg.repository.LocationRegionRepository;
 import com.cg.repository.TransferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +21,9 @@ import java.util.Optional;
 @Service
 @Transactional
 public class CustomerServiceImpl implements ICustomerService {
+
+    @Autowired
+    private LocationRegionRepository locationRegionRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -41,6 +47,11 @@ public class CustomerServiceImpl implements ICustomerService {
     @Override
     public List<Customer> findAllByDeletedIsFalse() {
         return customerRepository.findAllByDeletedIsFalse();
+    }
+
+    @Override
+    public List<CustomerDTO> findAllCustomerDTOByDeletedIsFalse() {
+        return customerRepository.findAllCustomerDTOByDeletedIsFalse();
     }
 
     @Override
@@ -77,6 +88,12 @@ public class CustomerServiceImpl implements ICustomerService {
 
     @Override
     public Customer save(Customer customer) {
+
+        LocationRegion locationRegion = customer.getLocationRegion();
+        locationRegionRepository.save(locationRegion);
+
+        customer.setLocationRegion(locationRegion);
+
         return customerRepository.save(customer);
     }
 

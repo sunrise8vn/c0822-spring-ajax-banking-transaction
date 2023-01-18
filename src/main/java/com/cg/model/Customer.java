@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
@@ -19,6 +20,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table(name = "customers")
+@Accessors(chain = true)
 public class Customer extends BaseEntity implements Validator {
 
     @Id
@@ -56,7 +58,6 @@ public class Customer extends BaseEntity implements Validator {
                 ", email='" + email + '\'' +
                 ", phone='" + phone + '\'' +
                 ", balance=" + balance +
-                ", address='" + address + '\'' +
                 '}';
     }
 
@@ -67,7 +68,7 @@ public class Customer extends BaseEntity implements Validator {
                 .setEmail(email)
                 .setPhone(phone)
                 .setBalance(balance)
-                .setAddress(address)
+                .setLocationRegion(locationRegion.toLocationRegionDTO())
                 ;
     }
 

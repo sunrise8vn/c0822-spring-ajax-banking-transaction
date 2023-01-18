@@ -3,21 +3,20 @@ package com.cg.controller.api;
 import com.cg.exception.DataInputException;
 import com.cg.model.Customer;
 import com.cg.model.Deposit;
+import com.cg.model.LocationRegion;
 import com.cg.model.Transfer;
+import com.cg.model.dto.CustomerCreateDTO;
 import com.cg.model.dto.CustomerDTO;
-import com.cg.model.dto.DepositCreateDTO;
 import com.cg.model.dto.TransferReqDTO;
 import com.cg.service.customer.ICustomerService;
 import com.cg.utils.AppUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.*;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
@@ -36,9 +35,10 @@ public class CustomerRestController {
     private ICustomerService customerService;
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getALlCustomers() {
+    public ResponseEntity<?> getALlCustomers() {
 
-        List<Customer> customers = customerService.findAllByDeletedIsFalse();
+//        List<Customer> customers = customerService.findAllByDeletedIsFalse();
+        List<CustomerDTO> customers = customerService.findAllCustomerDTOByDeletedIsFalse();
 
         return new ResponseEntity<>(customers, HttpStatus.OK);
     }
@@ -77,11 +77,24 @@ public class CustomerRestController {
         Customer customer = optionalCustomer.get();
         customer.setFullName(reqCustomer.getFullName());
         customer.setPhone(reqCustomer.getPhone());
-        customer.setAddress(reqCustomer.getAddress());
 
         customerService.save(customer);
 
         return new ResponseEntity<>(customer, HttpStatus.OK);
+    }
+
+
+    @PostMapping
+    public ResponseEntity<?> doCreate(@RequestBody CustomerCreateDTO customerCreateDTO) {
+
+//        LocationRegion locationRegion = customerCreateDTO.getLocationRegion().toLocationRegion();
+        Customer customer = customerCreateDTO.toCustomer(BigDecimal.ZERO);
+
+        customerService.save(customer);
+
+        CustomerDTO customerDTO = customer.toCustomerDTO();
+
+        return new ResponseEntity<>(customerDTO, HttpStatus.CREATED);
     }
 
     @PostMapping("/deposit")
