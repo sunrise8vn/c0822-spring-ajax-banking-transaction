@@ -715,8 +715,16 @@
                 addEventShowConfirmDelete();
 
             })
-            .fail((error) => {
-                console.log(error)
+            .fail((jqXHR) => {
+                let errors = jqXHR.responseJSON;
+
+                $("#modalCreateCustomer .modal-alert-danger").empty().removeClass('hide').addClass('show');
+
+                $.each(errors, (k, v) => {
+                    let subK = k.replaceAll('locationRegion.', '');
+                    let str = `<label id="${subK}-error" class="error" for="${subK}Cre">${v}</label>`;
+                    $("#modalCreateCustomer .modal-alert-danger").append(str);
+                })
             })
     }
 

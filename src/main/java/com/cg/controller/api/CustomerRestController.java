@@ -85,7 +85,13 @@ public class CustomerRestController {
 
 
     @PostMapping
-    public ResponseEntity<?> doCreate(@RequestBody CustomerCreateDTO customerCreateDTO) {
+    public ResponseEntity<?> doCreate(@Validated @RequestBody CustomerCreateDTO customerCreateDTO, BindingResult bindingResult) {
+
+        new CustomerCreateDTO().validate(customerCreateDTO, bindingResult);
+
+        if (bindingResult.hasFieldErrors()) {
+            return appUtils.mapErrorToResponse(bindingResult);
+        }
 
 //        LocationRegion locationRegion = customerCreateDTO.getLocationRegion().toLocationRegion();
         Customer customer = customerCreateDTO.toCustomer(BigDecimal.ZERO);

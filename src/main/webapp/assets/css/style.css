@@ -37,7 +37,7 @@ footer {
 }
 
 .show {
-    display: block;
+    display: block !important;
 }
 
 .hide, .hidden {
